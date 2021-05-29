@@ -1,8 +1,8 @@
-"""
+'''
   MLT - Grading Components (based on pytest fixtures)
 
   Note: Writes results to 'comments.txt' in current working directory
-"""
+'''
 
 from collections import namedtuple
 from contextlib import contextmanager
@@ -28,11 +28,11 @@ class TimeoutException(Exception):
 
 #
 class Grader(object):
-  """
+  '''
     Main grader class
 
     An instance of this is passed in through a pytest fixture
-  """
+  '''
 
   #
   def __init__(self, max_points=None, html_pre_block=False):
@@ -136,7 +136,7 @@ class Grader(object):
 #
 @contextmanager
 def time_limit(seconds, msg='Exceeded time limit!'):
-  """
+  '''
     A contextmanager that raises a TimeoutException if execution takes longer than specified time.
 
     Usage:
@@ -145,7 +145,7 @@ def time_limit(seconds, msg='Exceeded time limit!'):
 
     Note: seconds must be an integer.
     Based on: http://stackoverflow.com/a/601168
-  """
+  '''
 
   def signal_handler(signum, frame):
     raise TimeoutException(msg)
@@ -191,11 +191,11 @@ def proc_wrapper(func, rv, pos_args, keyword_args):
 # test fixtures
 @pytest.fixture(scope='module')
 def grader(request):
-  """
+  '''
     A module-level grading fixture
-  """
+  '''
 
-  max_points = getattr(request.module, 'max_points', None)  # picked up from test module, if defined
+  max_points = getattr(request.module, 'max_points', None) # picked up from test module, if defined
   html_pre_block = getattr(request.module, 'html_pre_block', False) # surround with HTML <pre> tag?
 
   _grader = Grader(max_points=max_points, html_pre_block=html_pre_block)
