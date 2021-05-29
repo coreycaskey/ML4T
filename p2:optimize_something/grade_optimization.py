@@ -1,10 +1,10 @@
-"""
+'''
   Optimize a Portfolio - Grading Script
 
   Usage:
     - Point the terminal location to this directory
-    - Run the command `PYTHONPATH=../:. python3 grade_optimization.py`
-"""
+    - Run the command `PYTHONPATH=../:. python grade_optimization.py`
+'''
 
 from collections import namedtuple
 from grading.grading import GradeResult, IncorrectOutput, grader, time_limit
@@ -15,8 +15,7 @@ import os
 import pytest
 import sys
 import traceback as tb
-
-main_code = 'optimization'
+import optimization
 
 #
 def str_to_date(date_str):
@@ -101,10 +100,12 @@ optimization_test_cases = [
   )
 ]
 
-abs_margins = dict(sum_to_one=0.02, alloc_range=0.02, alloc_match=0.1)  # absolute margin of error for each component
+main_code = 'optimization'
+
+abs_margins = dict(sum_to_one=0.02, alloc_range=0.02, alloc_match=0.1) # absolute margin of error for each component
 points_per_component = dict(sum_to_one=2.0, alloc_range=2.0, alloc_match=4.0) # points for each component, for partial credit
 points_per_test_case = sum(points_per_component.values())
-seconds_per_test_case = 10  # execution time limit
+seconds_per_test_case = 10 # execution time limit
 
 # grading parameters (picked up by module-level grading fixtures)
 max_points = float(len(optimization_test_cases) * points_per_test_case)
@@ -113,22 +114,15 @@ html_pre_block = True # surround comments with HTML <pre> tag
 # test function(s)
 @pytest.mark.parametrize('inputs,outputs,description', optimization_test_cases)
 def test_optimization(inputs, outputs, description, grader):
-  """
-    Test that optimize_portfolio() returns correct allocations
+  '''
+    Tests that optimize_portfolio() returns correct allocations
 
     Requires test inputs, expected outputs, description, and a grader fixture
-  """
+  '''
 
-  points_earned = 0.0  # initialize points for this test case
+  points_earned = 0.0 # initialize points for this test case
 
   try:
-    # try to import student code (only once)
-    if not main_code in globals():
-      import importlib
-
-      mod = importlib.import_module(main_code)
-      globals()[main_code] = mod
-
     # unpack test case
     start_date = inputs['start_date']
     end_date = inputs['end_date']
@@ -146,35 +140,33 @@ def test_optimization(inputs, outputs, description, grader):
     msgs = []
     correct_allocs = outputs['allocs']
 
-    # check sum_to_one: allocations sum to 1.0 +/- margin
+    # check allocations sum to 1.0 +/- margin
     sum_allocs = np.sum(student_allocs)
 
     if abs(sum_allocs - 1.0) > abs_margins['sum_to_one']:
       incorrect = True
       msgs.append('    sum of allocations: {} (expected: 1.0)'.format(sum_allocs))
-      student_allocs = student_allocs / sum_allocs  # normalize allocations, if they don't sum to 1.0
+      student_allocs = student_allocs / sum_allocs # normalize allocations, if they don't sum to 1.0
 
     else:
       points_earned += points_per_component['sum_to_one']
 
-    # check alloc_range: each allocation is within [0.0, 1.0] +/- margin
+    # check each allocation is within [0.0, 1.0] +/- margin
     points_per_alloc_range = points_per_component['alloc_range'] / len(correct_allocs)
 
-    # check alloc_match: each allocation matches expected value +/- margin
+    # check each allocation matches expected value +/- margin
     points_per_alloc_match = points_per_component['alloc_match'] / len(correct_allocs)
 
     for symbol, alloc, correct_alloc in zip(symbols, student_allocs, correct_allocs):
       if alloc < -abs_margins['alloc_range'] or alloc > (1.0 + abs_margins['alloc_range']):
         incorrect = True
         msgs.append('    {} - allocation out of range: {} (expected: [0.0, 1.0])'.format(symbol, alloc))
-
       else:
         points_earned += points_per_alloc_range
 
         if abs(alloc - correct_alloc) > abs_margins['alloc_match']:
           incorrect = True
           msgs.append('    {} - incorrect allocation: {} (expected: {})'.format(symbol, alloc, correct_alloc))
-
         else:
           points_earned += points_per_alloc_match
 
@@ -213,7 +205,4 @@ def test_optimization(inputs, outputs, description, grader):
 
 #
 if __name__ == '__main__':
-  # the '-s' flag disables capturing, showing stdcalls for print statements, logging calls, etc.
-  # __file__ points to this file path
-
   pytest.main(['-s', __file__])

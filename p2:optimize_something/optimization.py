@@ -1,6 +1,6 @@
-"""
+'''
   Optimize a Portfolio
-"""
+'''
 
 from util import get_data
 
@@ -13,9 +13,9 @@ import scipy.optimize as spo
 
 #
 def optimize_portfolio(sd=dt.datetime(2008, 1, 1), ed=dt.datetime(2009, 1, 1), syms=['GOOG', 'AAPL', 'GLD', 'XOM'], gen_plot=False):
-  """
+  '''
     This function is tested by the autograder
-  """
+  '''
 
   dates = pd.date_range(sd, ed)
   portfolio_and_spy_prices = get_data(syms, dates) # read in adjusted closing prices for given symbols
@@ -48,27 +48,26 @@ def optimize_portfolio(sd=dt.datetime(2008, 1, 1), ed=dt.datetime(2009, 1, 1), s
 
 #
 def save_plot(df):
-  ax = df.plot(title="Daily Portfolio Value and SPY", fontsize=12, grid=True)
-  ax.set_xlabel("Date")
-  ax.set_ylabel("Price")
-  plt.savefig("Figure_1.png")
+  ax = df.plot(title='Daily Portfolio Value and SPY', fontsize=12, grid=True)
+  ax.set_xlabel('Date')
+  ax.set_ylabel('Price')
+  plt.savefig('Figure_1.png')
 
 #
 def get_sharpe_ratio(x, symbols, portfolio_prices):
-  """
-    Retrieves the (negated) Sharpe Ratio for a portfolio
-  """
+  '''
+    Retrieves the (negated) Sharpe Ratio for a portfolio, where x
+    is an array of potential stock allocations
+  '''
 
-  portfolio_statistics = assess_portfolio(x, symbols, portfolio_prices)
-
-  return portfolio_statistics[3] * -1
+  return assess_portfolio(x, symbols, portfolio_prices, False) * -1
 
 #
-def assess_portfolio(allocations, symbols, portfolio_prices):
-  """
+def assess_portfolio(allocations, symbols, portfolio_prices, multi_val_return=True):
+  '''
     Calculates critical statistics for a given portfolio containing the
     provided stock symbols and allocations
-  """
+  '''
 
   normalized_prices = portfolio_prices.copy()
   normalized_prices /= normalized_prices.iloc[0, :]
@@ -85,16 +84,19 @@ def assess_portfolio(allocations, symbols, portfolio_prices):
 
   sharpe_ratio = math.sqrt(252) * (avg_daily_return / std_daily_return)
 
-  return cumulative_return, avg_daily_return, std_daily_return, sharpe_ratio, portfolio_values
+  if multi_val_return:
+    return cumulative_return, avg_daily_return, std_daily_return, sharpe_ratio, portfolio_values
+  else:
+    return sharpe_ratio
 
 #
 def test_code():
-  """
+  '''
     This function is not called by the autograder
 
     Any variables defined below will be set to different values
     by the autograder
-  """
+  '''
 
   start_date = dt.datetime(2008, 6, 1)
   end_date = dt.datetime(2009, 6, 1)
@@ -108,19 +110,19 @@ def test_code():
     gen_plot = True
   )
 
-  print("Start Date:", start_date)
-  print("End Date:", end_date)
-  print("Symbols:", symbols)
-  print("Allocations:", allocations)
-  print("Sharpe Ratio:", sr)
-  print("Volatility (stdev of daily returns):", sddr)
-  print("Average Daily Return:", adr)
-  print("Cumulative Return:", cr)
+  print('Start Date:', start_date)
+  print('End Date:', end_date)
+  print('Symbols:', symbols)
+  print('Allocations:', allocations)
+  print('Sharpe Ratio:', sr)
+  print('Volatility (stdev of daily returns):', sddr)
+  print('Average Daily Return:', adr)
+  print('Cumulative Return:', cr)
 
 #
-if __name__ == "__main__":
-  """
+if __name__ == '__main__':
+  '''
     This code is not called by the autograder
-  """
+  '''
 
   test_code()
