@@ -11,7 +11,7 @@ import LinRegLearner as lrl
 
 if __name__ == '__main__':
   if len(sys.argv) != 2:
-    print('Usage: python3 testlearner.py Data/<filename>')
+    print('Usage: python testlearner.py Data/<filename>')
     sys.exit(1)
 
   inf = open(sys.argv[1])
@@ -27,30 +27,36 @@ if __name__ == '__main__':
   test_x = data[train_rows:, 0:-1]
   test_y = data[train_rows:, -1]
 
-  print(f'{test_x.shape}')
-  print(f'{test_y.shape}')
+  print('Training Data X: {}'.format(train_x.shape))
+  print('Training Data Y: {}'.format(train_y.shape))
+
+  print('Testing Data X: {}'.format(test_x.shape))
+  print('Testing Data Y: {}'.format(test_y.shape))
 
   # create a learner and train it
   learner = lrl.LinRegLearner(verbose=True) # create a LinRegLearner
-  learner.add_evidence(train_x, train_y)  # train it
+  learner.add_evidence(train_x, train_y) # train it
 
-  # evaluate in sample
-  pred_y = learner.query(train_x) # get the predictions
+  # evaluate in-sample
+  pred_y = learner.query(train_x)
   rmse = math.sqrt(((train_y - pred_y) ** 2).sum() / train_y.shape[0])
-  print()
-  print('In sample results')
-  print(f'RMSE: {rmse}')
-  c = np.corrcoef(pred_y, y=train_y)
-  print(f'corr: {c[0,1]}')
 
-  # evaluate out of sample
-  pred_y = learner.query(test_x)  # get the predictions
+  print()
+  print('In-sample results')
+  print('RMSE: {}'.format(rmse))
+
+  c = np.corrcoef(pred_y, y=train_y)
+
+  print('Corr: {}'.format(c[0,1]))
+
+  # evaluate out-of-sample
+  pred_y = learner.query(test_x)
   rmse = math.sqrt(((test_y - pred_y) ** 2).sum() / test_y.shape[0])
 
   print()
-  print('Out of sample results')
-  print(f'RMSE: {rmse}')
+  print('Out-of-sample results')
+  print('RMSE: {}'.format(rmse))
 
   c = np.corrcoef(pred_y, y=test_y)
 
-  print(f'corr: {c[0,1]}')
+  print('Corr: {}'.format(c[0,1]))

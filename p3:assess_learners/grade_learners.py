@@ -3,7 +3,7 @@
 Usage:
 - Switch to a student feedback directory first (will write 'points.txt' and 'comments.txt' in pwd).
 - Run this script with both ml4t/ and student solution in PYTHONPATH, e.g.:
-    PYTHONPATH=ml4t:MC3-P1/jdoe7 python ml4t/mc3_p1_grading/grade_learners.py
+  PYTHONPATH=ml4t:MC3-P1/jdoe7 python ml4t/mc3_p1_grading/grade_learners.py
 
 Copyright 2018, Georgia Institute of Technology (Georgia Tech)
 Atlanta, Georgia 30332
@@ -40,13 +40,7 @@ import numpy as np
 import pandas as pd
 import pytest
 import util
-from grading.grading import (
-    GradeResult,
-    IncorrectOutput,
-    grader,
-    run_with_timeout,
-    time_limit,
-)
+from grading.grading import GradeResult, IncorrectOutput, grader, run_with_timeout, time_limit
 
 # Grading parameters
 # rmse_margins = dict(KNNLearner=1.10, BagLearner=1.10)  # 1.XX = +XX% margin of RMS error
@@ -55,497 +49,492 @@ from grading.grading import (
 # seconds_per_test_case = 6
 
 # More grading parameters (picked up by module-level grading fixtures)
-max_points = 50.0  # 3.0*5 + 3.0*5 + 2.0*10 = 50
-html_pre_block = (
-    True  # surround comments with HTML <pre> tag (for T-Square comments field)
-)
+max_points = 50.0
+html_pre_block = True
 
 # Test cases
-LearningTestCase = namedtuple(
-    'LearningTestCase', ['description', 'group', 'datafile', 'seed', 'outputs']
-)
+LearningTestCase = namedtuple('LearningTestCase', ['description', 'group', 'datafile', 'seed', 'outputs'])
+
 learning_test_cases = [
-    ########################
-    # DTLearner test cases #
-    ########################
-    LearningTestCase(
-        description='Test Case 01: Deterministic Tree',
-        group='DTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090001,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    LearningTestCase(
-        description='Test Case 02: Deterministic Tree',
-        group='DTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090002,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    LearningTestCase(
-        description='Test Case 03: Deterministic Tree',
-        group='DTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090003,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    LearningTestCase(
-        description='Test Case 04: Deterministic Tree',
-        group='DTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090004,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    ########################
-    # RTLearner test cases #
-    ########################
-    LearningTestCase(
-        description='Test Case 01: Random Tree',
-        group='RTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090001,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    LearningTestCase(
-        description='Test Case 02: Random Tree',
-        group='RTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090002,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    LearningTestCase(
-        description='Test Case 03: Random Tree',
-        group='RTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090003,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    LearningTestCase(
-        description='Test Case 04: Random Tree',
-        group='RTLearner',
-        datafile='Istanbul.csv',
-        seed=1481090004,
-        outputs=dict(
-            insample_corr_min=0.95,
-            outsample_corr_min=0.15,
-            insample_corr_max=0.95,
-        ),
-    ),
-    ######################
-    # Bagging test cases #
-    ######################
-    LearningTestCase(
-        description='Test Case 01: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090001,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Test Case 02: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090002,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Test Case 03: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090003,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Test Case 04: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090004,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Test Case 05: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090005,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Test Case 06: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090006,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Test Case 07: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090007,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Test Case 08: Bagging',
-        group='BagLearner',
-        datafile='Istanbul.csv',
-        seed=1481090008,
-        outputs=None,
-    ),
-    ##############################
-    # RandomName + InsaneLearner #
-    ##############################
-    LearningTestCase(
-        description='InsaneLearner Test Case',
-        group='InsaneLearner',
-        datafile='simple.csv',
-        seed=1498076428,
-        outputs=None,
-    ),
-    LearningTestCase(
-        description='Random Classname Test Case',
-        group='RandomName',
-        datafile='simple.csv',
-        seed=1498076428,
-        outputs=None,
-    ),
+  ########################
+  # DTLearner test cases #
+  ########################
+  LearningTestCase(
+    description='Test Case 01: Deterministic Tree',
+    group='DTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090001,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  LearningTestCase(
+    description='Test Case 02: Deterministic Tree',
+    group='DTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090002,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  LearningTestCase(
+    description='Test Case 03: Deterministic Tree',
+    group='DTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090003,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  LearningTestCase(
+    description='Test Case 04: Deterministic Tree',
+    group='DTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090004,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  ########################
+  # RTLearner test cases #
+  ########################
+  LearningTestCase(
+    description='Test Case 01: Random Tree',
+    group='RTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090001,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  LearningTestCase(
+    description='Test Case 02: Random Tree',
+    group='RTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090002,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  LearningTestCase(
+    description='Test Case 03: Random Tree',
+    group='RTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090003,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  LearningTestCase(
+    description='Test Case 04: Random Tree',
+    group='RTLearner',
+    datafile='Istanbul.csv',
+    seed=1481090004,
+    outputs=dict(
+      insample_corr_min=0.95,
+      outsample_corr_min=0.15,
+      insample_corr_max=0.95
+    )
+  ),
+  ######################
+  # Bagging test cases #
+  ######################
+  LearningTestCase(
+    description='Test Case 01: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090001,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Test Case 02: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090002,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Test Case 03: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090003,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Test Case 04: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090004,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Test Case 05: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090005,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Test Case 06: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090006,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Test Case 07: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090007,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Test Case 08: Bagging',
+    group='BagLearner',
+    datafile='Istanbul.csv',
+    seed=1481090008,
+    outputs=None
+  ),
+  ##############################
+  # RandomName + InsaneLearner #
+  ##############################
+  LearningTestCase(
+    description='InsaneLearner Test Case',
+    group='InsaneLearner',
+    datafile='simple.csv',
+    seed=1498076428,
+    outputs=None
+  ),
+  LearningTestCase(
+    description='Random Classname Test Case',
+    group='RandomName',
+    datafile='simple.csv',
+    seed=1498076428,
+    outputs=None
+  ),
 ]
 
-
 # Test functon(s)
-@pytest.mark.parametrize(
-    'description,group,datafile,seed,outputs', learning_test_cases
-)
+@pytest.mark.parametrize('description,group,datafile,seed,outputs', learning_test_cases)
 def test_learners(description, group, datafile, seed, outputs, grader):
-    '''Test ML models returns correct predictions.
+  '''
+    Test ML models return correct predictions
 
-    Requires test description, test case group, inputs, expected outputs, and a grader fixture.
-    '''
+    Requires test description, test case group, inputs, expected outputs, and a grader fixture
+  '''
 
-    points_earned = 0.0  # initialize points for this test case
-    try:
-        learner_class = None
-        kwargs = {'verbose': False}
+  points_earned = 0.0  # initialize points for this test case
+  try:
+    learner_class = None
+    kwargs = {'verbose': False}
 
-        # (BPH) Copied from grade_strategy_qlearning.py
-        # Set fixed seed for repetability
-        np.random.seed(seed)
-        random.seed(seed)
-        # remove ability to seed either np.random or python random
-        tmp_numpy_seed = np.random.seed
-        tmp_random_seed = random.seed
-        np.random.seed = fake_seed
-        random.seed = fake_rseed
+    # (BPH) Copied from grade_strategy_qlearning.py
+    # Set fixed seed for repetability
+    np.random.seed(seed)
+    random.seed(seed)
+    # remove ability to seed either np.random or python random
+    tmp_numpy_seed = np.random.seed
+    tmp_random_seed = random.seed
+    np.random.seed = fake_seed
+    random.seed = fake_rseed
 
-        # Try to import KNNLearner (only once)
-        # if not 'KNNLearner' in globals():
-        #     from KNNLearner import KNNLearner
-        if not 'RTLearner' in globals():
-            from RTLearner import RTLearner
-        if not 'DTLearner' in globals():
-            from DTLearner import DTLearner
-        if (
-            (group is 'BagLearner')
-            or (group is 'InsaneLearner')
-            or (group is 'RandomName')
-            and (not 'BagLearner' in globals())
-        ):
-            from BagLearner import BagLearner
-        # put seeds back for the moment
-        np.random.seed = tmp_numpy_seed
-        random.seed = tmp_random_seed
-        # Tweak kwargs
-        # kwargs.update(inputs.get('kwargs', {}))
+    # Try to import KNNLearner (only once)
+    # if not 'KNNLearner' in globals():
+    #     from KNNLearner import KNNLearner
+    if not 'RTLearner' in globals():
+      from RTLearner import RTLearner
+    if not 'DTLearner' in globals():
+      from DTLearner import DTLearner
+    if (
+      (group is 'BagLearner')
+      or (group is 'InsaneLearner')
+      or (group is 'RandomName')
+      and (not 'BagLearner' in globals())
+    ):
+      from BagLearner import BagLearner
+    # put seeds back for the moment
+    np.random.seed = tmp_numpy_seed
+    random.seed = tmp_random_seed
+    # Tweak kwargs
+    # kwargs.update(inputs.get('kwargs', {}))
 
-        # Read separate training and testing data files
-        # with open(inputs['train_file']) as f:
-        # data_partitions=list()
-        test_x, test_y, train_x, train_y = None, None, None, None
-        permutation = None
-        author = None
-        with util.get_learner_data_file(datafile) as f:
-            alldata = np.genfromtxt(f, delimiter=',')
-            # Skip the date column and header row if we're working on Istanbul data
-            if datafile == 'Istanbul.csv':
-                alldata = alldata[1:, 1:]
-            datasize = alldata.shape[0]
-            cutoff = int(datasize * 0.6)
-            permutation = np.random.permutation(alldata.shape[0])
-            col_permutation = np.random.permutation(alldata.shape[1] - 1)
-            train_data = alldata[permutation[:cutoff], :]
-            # train_x = train_data[:,:-1]
-            train_x = train_data[:, col_permutation]
-            train_y = train_data[:, -1]
-            test_data = alldata[permutation[cutoff:], :]
-            # test_x = test_data[:,:-1]
-            test_x = test_data[:, col_permutation]
-            test_y = test_data[:, -1]
-        msgs = []
+    # Read separate training and testing data files
+    # with open(inputs['train_file']) as f:
+    # data_partitions=list()
+    test_x, test_y, train_x, train_y = None, None, None, None
+    permutation = None
+    author = None
+    with util.get_learner_data_file(datafile) as f:
+        alldata = np.genfromtxt(f, delimiter=',')
+        # Skip the date column and header row if we're working on Istanbul data
+        if datafile == 'Istanbul.csv':
+            alldata = alldata[1:, 1:]
+        datasize = alldata.shape[0]
+        cutoff = int(datasize * 0.6)
+        permutation = np.random.permutation(alldata.shape[0])
+        col_permutation = np.random.permutation(alldata.shape[1] - 1)
+        train_data = alldata[permutation[:cutoff], :]
+        # train_x = train_data[:,:-1]
+        train_x = train_data[:, col_permutation]
+        train_y = train_data[:, -1]
+        test_data = alldata[permutation[cutoff:], :]
+        # test_x = test_data[:,:-1]
+        test_x = test_data[:, col_permutation]
+        test_y = test_data[:, -1]
+    msgs = []
 
-        if (group is 'RTLearner') or (group is 'DTLearner'):
-            clss_name = RTLearner if group is 'RTLearner' else DTLearner
-            tree_sptc = 3 if group is 'RTLearner' else 10
-            corr_in, corr_out, corr_in_50 = None, None, None
+    if (group is 'RTLearner') or (group is 'DTLearner'):
+        clss_name = RTLearner if group is 'RTLearner' else DTLearner
+        tree_sptc = 3 if group is 'RTLearner' else 10
+        corr_in, corr_out, corr_in_50 = None, None, None
 
-            def oneleaf():
-                np.random.seed(seed)
-                random.seed(seed)
-                np.random.seed = fake_seed
-                random.seed = fake_rseed
-                learner = clss_name(leaf_size=1, verbose=False)
-                learner.add_evidence(train_x, train_y)
-                insample = learner.query(train_x)
-                outsample = learner.query(test_x)
-                np.random.seed = tmp_numpy_seed
-                random.seed = tmp_random_seed
-                author_rv = None
-                try:
-                    author_rv = learner.author()
-                except:
-                    pass
-                return insample, outsample, author_rv
+        def oneleaf():
+            np.random.seed(seed)
+            random.seed(seed)
+            np.random.seed = fake_seed
+            random.seed = fake_rseed
+            learner = clss_name(leaf_size=1, verbose=False)
+            learner.add_evidence(train_x, train_y)
+            insample = learner.query(train_x)
+            outsample = learner.query(test_x)
+            np.random.seed = tmp_numpy_seed
+            random.seed = tmp_random_seed
+            author_rv = None
+            try:
+                author_rv = learner.author()
+            except:
+                pass
+            return insample, outsample, author_rv
 
-            def fiftyleaves():
-                np.random.seed(seed)
-                random.seed(seed)
-                np.random.seed = fake_seed
-                random.seed = fake_rseed
-                learner = clss_name(leaf_size=50, verbose=False)
-                learner.add_evidence(train_x, train_y)
-                np.random.seed = tmp_numpy_seed
-                random.seed = tmp_random_seed
-                return learner.query(train_x)
+        def fiftyleaves():
+            np.random.seed(seed)
+            random.seed(seed)
+            np.random.seed = fake_seed
+            random.seed = fake_rseed
+            learner = clss_name(leaf_size=50, verbose=False)
+            learner.add_evidence(train_x, train_y)
+            np.random.seed = tmp_numpy_seed
+            random.seed = tmp_random_seed
+            return learner.query(train_x)
 
-            pred_y_in, pred_y_out, author = run_with_timeout(
-                oneleaf, tree_sptc, (), {}
+        pred_y_in, pred_y_out, author = run_with_timeout(
+            oneleaf, tree_sptc, (), {}
+        )
+        pred_y_in_50 = run_with_timeout(fiftyleaves, tree_sptc, (), {})
+        corr_in = np.corrcoef(pred_y_in, y=train_y)[0, 1]
+        corr_out = np.corrcoef(pred_y_out, y=test_y)[0, 1]
+        corr_in_50 = np.corrcoef(pred_y_in_50, y=train_y)[0, 1]
+        incorrect = False
+
+        if corr_in < outputs['insample_corr_min'] or np.isnan(corr_in):
+            incorrect = True
+            msgs.append(
+                '    In-sample with leaf_size=1 correlation less than'
+                ' allowed: got {} expected {}'.format(
+                    corr_in, outputs['insample_corr_min']
+                )
             )
-            pred_y_in_50 = run_with_timeout(fiftyleaves, tree_sptc, (), {})
-            corr_in = np.corrcoef(pred_y_in, y=train_y)[0, 1]
-            corr_out = np.corrcoef(pred_y_out, y=test_y)[0, 1]
-            corr_in_50 = np.corrcoef(pred_y_in_50, y=train_y)[0, 1]
+        else:
+            points_earned += 1.0
+        if corr_out < outputs['outsample_corr_min'] or np.isnan(corr_out):
+            incorrect = True
+            msgs.append(
+                '    Out-of-sample correlation less than allowed: got {}'
+                ' expected {}'.format(
+                    corr_out, outputs['outsample_corr_min']
+                )
+            )
+        else:
+            points_earned += 1.0
+        if corr_in_50 > outputs['insample_corr_max'] or np.isnan(
+            corr_in_50
+        ):
+            incorrect = True
+            msgs.append(
+                '    In-sample correlation with leaf_size=50 greater than'
+                ' allowed: got {} expected {}'.format(
+                    corr_in_50, outputs['insample_corr_max']
+                )
+            )
+        else:
+            points_earned += 1.0
+        # Check author string
+        if (author is None) or (author == 'tb34'):
+            incorrect = True
+            msgs.append('    Invalid author: {}'.format(author))
+            points_earned += -2.0
+
+    elif group is 'BagLearner':
+        corr1, corr20 = None, None
+        bag_sptc = 10
+
+        def onebag():
+            np.random.seed(seed)
+            random.seed(seed)
+            np.random.seed = fake_seed
+            random.seed = fake_rseed
+            learner1 = BagLearner(
+                learner=RTLearner,
+                kwargs={'leaf_size': 1},
+                bags=1,
+                boost=False,
+                verbose=False,
+            )
+            learner1.add_evidence(train_x, train_y)
+            q_rv = learner1.query(test_x)
+            a_rv = learner1.author()
+            np.random.seed = tmp_numpy_seed
+            random.seed = tmp_random_seed
+            return q_rv, a_rv
+
+        def twentybags():
+            np.random.seed(seed)
+            random.seed(seed)
+            np.random.seed = fake_seed
+            random.seed = fake_rseed
+            learner20 = BagLearner(
+                learner=RTLearner,
+                kwargs={'leaf_size': 1},
+                bags=20,
+                boost=False,
+                verbose=False,
+            )
+            learner20.add_evidence(train_x, train_y)
+            q_rv = learner20.query(test_x)
+            np.random.seed = tmp_numpy_seed
+            random.seed = tmp_random_seed
+            return q_rv
+
+        pred_y_1, author = run_with_timeout(
+            onebag, bag_sptc, pos_args=(), keyword_args={}
+        )
+        pred_y_20 = run_with_timeout(twentybags, bag_sptc, (), {})
+
+        corr1 = np.corrcoef(pred_y_1, test_y)[0, 1]
+        corr20 = np.corrcoef(pred_y_20, test_y)[0, 1]
+        incorrect = False
+        # msgs = []
+        if corr20 <= corr1:
+            incorrect = True
+            msgs.append(
+                '    Out-of-sample correlation for 20 bags is not greater'
+                ' than for 1 bag. 20 bags:{}, 1 bag:{}'.format(
+                    corr20, corr1
+                )
+            )
+        else:
+            points_earned += 2.0
+        # Check author string
+        if (author is None) or (author == 'tb34'):
+            incorrect = True
+            msgs.append('    Invalid author: {}'.format(author))
+            points_earned += -1.0
+    elif group is 'InsaneLearner':
+        try:
+
+            def insane():
+                import InsaneLearner as it
+
+                learner = it.InsaneLearner(verbose=False)
+                learner.add_evidence(train_x, train_y)
+                y = learner.query(test_x)
+
+            run_with_timeout(insane, 10, pos_args=(), keyword_args={})
             incorrect = False
+        except Exception as e:
+            incorrect = True
+            msgs.append(
+                '    Exception calling InsaneLearner: {}'.format(e)
+            )
+            points_earned = -10
+    elif group is 'RandomName':
+        try:
+            il_name, il_code = gen_class()
+            exec(il_code) in globals(), locals()
+            il_cobj = eval(il_name)
 
-            if corr_in < outputs['insample_corr_min'] or np.isnan(corr_in):
-                incorrect = True
-                msgs.append(
-                    '    In-sample with leaf_size=1 correlation less than'
-                    ' allowed: got {} expected {}'.format(
-                        corr_in, outputs['insample_corr_min']
-                    )
-                )
-            else:
-                points_earned += 1.0
-            if corr_out < outputs['outsample_corr_min'] or np.isnan(corr_out):
-                incorrect = True
-                msgs.append(
-                    '    Out-of-sample correlation less than allowed: got {}'
-                    ' expected {}'.format(
-                        corr_out, outputs['outsample_corr_min']
-                    )
-                )
-            else:
-                points_earned += 1.0
-            if corr_in_50 > outputs['insample_corr_max'] or np.isnan(
-                corr_in_50
-            ):
-                incorrect = True
-                msgs.append(
-                    '    In-sample correlation with leaf_size=50 greater than'
-                    ' allowed: got {} expected {}'.format(
-                        corr_in_50, outputs['insample_corr_max']
-                    )
-                )
-            else:
-                points_earned += 1.0
-            # Check author string
-            if (author is None) or (author == 'tb34'):
-                incorrect = True
-                msgs.append('    Invalid author: {}'.format(author))
-                points_earned += -2.0
-
-        elif group is 'BagLearner':
-            corr1, corr20 = None, None
-            bag_sptc = 10
-
-            def onebag():
+            def rnd_name():
                 np.random.seed(seed)
                 random.seed(seed)
                 np.random.seed = fake_seed
                 random.seed = fake_rseed
-                learner1 = BagLearner(
-                    learner=RTLearner,
-                    kwargs={'leaf_size': 1},
-                    bags=1,
-                    boost=False,
-                    verbose=False,
-                )
-                learner1.add_evidence(train_x, train_y)
-                q_rv = learner1.query(test_x)
-                a_rv = learner1.author()
-                np.random.seed = tmp_numpy_seed
-                random.seed = tmp_random_seed
-                return q_rv, a_rv
-
-            def twentybags():
-                np.random.seed(seed)
-                random.seed(seed)
-                np.random.seed = fake_seed
-                random.seed = fake_rseed
-                learner20 = BagLearner(
-                    learner=RTLearner,
-                    kwargs={'leaf_size': 1},
+                learner = BagLearner(
+                    learner=il_cobj,
+                    kwargs={'verbose': False},
                     bags=20,
                     boost=False,
                     verbose=False,
                 )
-                learner20.add_evidence(train_x, train_y)
-                q_rv = learner20.query(test_x)
+                learner.add_evidence(train_x, train_y)
+                y = learner.query(test_x)
                 np.random.seed = tmp_numpy_seed
                 random.seed = tmp_random_seed
-                return q_rv
+                return (
+                    il_cobj.init_callcount_dict,
+                    il_cobj.add_callcount_dict,
+                    il_cobj.query_callcount_dict,
+                )
 
-            pred_y_1, author = run_with_timeout(
-                onebag, bag_sptc, pos_args=(), keyword_args={}
+            iccd, accd, qccd = run_with_timeout(
+                rnd_name, 10, pos_args=(), keyword_args={}
             )
-            pred_y_20 = run_with_timeout(twentybags, bag_sptc, (), {})
-
-            corr1 = np.corrcoef(pred_y_1, test_y)[0, 1]
-            corr20 = np.corrcoef(pred_y_20, test_y)[0, 1]
             incorrect = False
-            # msgs = []
-            if corr20 <= corr1:
+            if (len(iccd) != 20) or (any([v != 1 for v in iccd.values()])):
                 incorrect = True
                 msgs.append(
-                    '    Out-of-sample correlation for 20 bags is not greater'
-                    ' than for 1 bag. 20 bags:{}, 1 bag:{}'.format(
-                        corr20, corr1
+                    '    Unexpected number of calls to __init__, sum={}'
+                    ' (should be 20), max={} (should be 1), min={} (should'
+                    ' be 1)'.format(
+                        len(iccd), max(iccd.values()), min(iccd.values())
                     )
                 )
-            else:
-                points_earned += 2.0
-            # Check author string
-            if (author is None) or (author == 'tb34'):
-                incorrect = True
-                msgs.append('    Invalid author: {}'.format(author))
-                points_earned += -1.0
-        elif group is 'InsaneLearner':
-            try:
-
-                def insane():
-                    import InsaneLearner as it
-
-                    learner = it.InsaneLearner(verbose=False)
-                    learner.add_evidence(train_x, train_y)
-                    y = learner.query(test_x)
-
-                run_with_timeout(insane, 10, pos_args=(), keyword_args={})
-                incorrect = False
-            except Exception as e:
+                points_earned = -10
+            if (len(accd) != 20) or (any([v != 1 for v in accd.values()])):
                 incorrect = True
                 msgs.append(
-                    '    Exception calling InsaneLearner: {}'.format(e)
+                    '    Unexpected number of calls to add_evidence sum={}'
+                    ' (should be 20), max={} (should be 1), min={} (should'
+                    ' be 1)'.format(
+                        len(accd), max(accd.values()), min(accd.values())
+                    )
                 )
                 points_earned = -10
-        elif group is 'RandomName':
-            try:
-                il_name, il_code = gen_class()
-                exec(il_code) in globals(), locals()
-                il_cobj = eval(il_name)
-
-                def rnd_name():
-                    np.random.seed(seed)
-                    random.seed(seed)
-                    np.random.seed = fake_seed
-                    random.seed = fake_rseed
-                    learner = BagLearner(
-                        learner=il_cobj,
-                        kwargs={'verbose': False},
-                        bags=20,
-                        boost=False,
-                        verbose=False,
-                    )
-                    learner.add_evidence(train_x, train_y)
-                    y = learner.query(test_x)
-                    np.random.seed = tmp_numpy_seed
-                    random.seed = tmp_random_seed
-                    return (
-                        il_cobj.init_callcount_dict,
-                        il_cobj.add_callcount_dict,
-                        il_cobj.query_callcount_dict,
-                    )
-
-                iccd, accd, qccd = run_with_timeout(
-                    rnd_name, 10, pos_args=(), keyword_args={}
-                )
-                incorrect = False
-                if (len(iccd) != 20) or (any([v != 1 for v in iccd.values()])):
-                    incorrect = True
-                    msgs.append(
-                        '    Unexpected number of calls to __init__, sum={}'
-                        ' (should be 20), max={} (should be 1), min={} (should'
-                        ' be 1)'.format(
-                            len(iccd), max(iccd.values()), min(iccd.values())
-                        )
-                    )
-                    points_earned = -10
-                if (len(accd) != 20) or (any([v != 1 for v in accd.values()])):
-                    incorrect = True
-                    msgs.append(
-                        '    Unexpected number of calls to add_evidence sum={}'
-                        ' (should be 20), max={} (should be 1), min={} (should'
-                        ' be 1)'.format(
-                            len(accd), max(accd.values()), min(accd.values())
-                        )
-                    )
-                    points_earned = -10
-                if (len(qccd) != 20) or (any([v != 1 for v in qccd.values()])):
-                    incorrect = True
-                    msgs.append(
-                        '    Unexpected number of calls to query, sum={}'
-                        ' (should be 20), max={} (should be 1), min={} (should'
-                        ' be 1)'.format(
-                            len(qccd), max(qccd.values()), min(qccd.values())
-                        )
-                    )
-                    points_earned = -10
-            except Exception as e:
+            if (len(qccd) != 20) or (any([v != 1 for v in qccd.values()])):
                 incorrect = True
-                msgs.append('   Exception calling BagLearner: {}'.format(e))
+                msgs.append(
+                    '    Unexpected number of calls to query, sum={}'
+                    ' (should be 20), max={} (should be 1), min={} (should'
+                    ' be 1)'.format(
+                        len(qccd), max(qccd.values()), min(qccd.values())
+                    )
+                )
                 points_earned = -10
-        if incorrect:
-            inputs_str = '    data file: {}\n    permutation: {}'.format(
-                datafile, permutation
-            )
-            raise IncorrectOutput(
-                'Test failed on one or more output criteria.\n  Inputs:\n{}\n '
-                ' Failures:\n{}'.format(inputs_str, '\n'.join(msgs))
-            )
+        except Exception as e:
+            incorrect = True
+            msgs.append('   Exception calling BagLearner: {}'.format(e))
+            points_earned = -10
+    if incorrect:
+        inputs_str = '    data file: {}\n    permutation: {}'.format(
+            datafile, permutation
+        )
+        raise IncorrectOutput(
+            'Test failed on one or more output criteria.\n  Inputs:\n{}\n '
+            ' Failures:\n{}'.format(inputs_str, '\n'.join(msgs))
+        )
     except Exception as e:
         # Test result: failed
         msg = 'Description: {} (group: {})\n'.format(description, group)

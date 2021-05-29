@@ -28,7 +28,7 @@ class LinRegLearner(object):
     new_data_x = np.ones([data_x.shape[0], data_x.shape[1] + 1])
     new_data_x[:, 0:data_x.shape[1]] = data_x
 
-    # build and save the model
+    # save the coefficients
     self.model_coefs = np.linalg.lstsq(new_data_x, data_y, rcond=None)[0]
 
   #
