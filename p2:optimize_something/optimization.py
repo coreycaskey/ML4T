@@ -1,5 +1,9 @@
 '''
   Optimize a Portfolio
+
+  Usage:
+    - Point the terminal location to this directory
+    - Run the command `PYTHONPATH=../:. python optimization.py`
 '''
 
 from util import get_data
@@ -65,7 +69,7 @@ def get_sharpe_ratio(x, symbols, portfolio_prices):
 #
 def assess_portfolio(allocations, symbols, portfolio_prices, multi_val_return=True):
   '''
-    Calculates critical statistics for a given portfolio containing the
+    Calculates critical statistics for a given portfolio that's using the
     provided stock symbols and allocations
   '''
 
@@ -82,7 +86,7 @@ def assess_portfolio(allocations, symbols, portfolio_prices, multi_val_return=Tr
   avg_daily_return = daily_returns.mean()
   std_daily_return = daily_returns.std()
 
-  sharpe_ratio = math.sqrt(252) * (avg_daily_return / std_daily_return)
+  sharpe_ratio = math.sqrt(252) * (avg_daily_return / std_daily_return) # sharpe ratio for daily historical data
 
   if multi_val_return:
     return cumulative_return, avg_daily_return, std_daily_return, sharpe_ratio, portfolio_values
@@ -94,8 +98,7 @@ def test_code():
   '''
     This function is not called by the autograder
 
-    Any variables defined below will be set to different values
-    by the autograder
+    Any variables defined below will be set to different values by the autograder
   '''
 
   start_date = dt.datetime(2008, 6, 1)
@@ -103,12 +106,7 @@ def test_code():
   symbols = ['IBM', 'X', 'GLD', 'JPM']
 
   # assess the portfolio
-  allocations, cr, adr, sddr, sr = optimize_portfolio( \
-    sd = start_date, \
-    ed = end_date,\
-    syms = symbols, \
-    gen_plot = True
-  )
+  allocations, cr, adr, sddr, sr = optimize_portfolio(sd=start_date, ed=end_date, syms=symbols, gen_plot=True)
 
   print('Start Date:', start_date)
   print('End Date:', end_date)
