@@ -15,7 +15,7 @@ def get_data(symbols, dates, add_spy=True, col_name='Adj Close'):
   df = pd.DataFrame(index=dates)
 
   if add_spy and 'SPY' not in symbols:
-    symbols = ['SPY'] + list(symbols) # handles case where symbols is an numpy array of 'object'
+    symbols = ['SPY'] + list(symbols)
 
   for symbol in symbols:
     df_temp = pd.read_csv(
