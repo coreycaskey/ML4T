@@ -7,7 +7,7 @@ import numpy as np
 
 #
 def test_code():
-  win_prob = 0.474  # 18/38 - red, 18/38 - black
+  win_prob = 0.474 # 18/38 - red, 18/38 - black
   np.random.seed(1) # make 'predictable' random numbers
 
   # Experiment 1
@@ -47,7 +47,7 @@ def make_plot(win_prob, figure_num):
 #
 def figure_one_test(win_prob):
   '''
-    Run the simple simulator 10 times (and plot each line)
+    Run the simple simulator 10 times (with max 1000 spins) and plot each line
   '''
 
   for _ in range(10):
@@ -58,104 +58,106 @@ def figure_one_test(win_prob):
 #
 def figure_two_test(win_prob):
   '''
-    Run the simple simulator 1000 times (and plot the mean and
-    standard deviation lines)
+    Run the simple simulator 1000 times (with max 1000 spins) and plot the mean and
+    standard deviation lines
   '''
 
-  simulations_matrix = get_simple_simulations_matrix(win_prob, num_simulations=1000)
+  # matrix of winnings where row = simulation number and col = spin number
+  simulations_matrix = get_simple_simulations_matrix(win_prob, max_spin_count=1000, num_simulations=1000)
 
-  spin_mean_winnings = np.mean(simulations_matrix, axis=0)  # operation against each column
-  spin_std_winnings = np.std(simulations_matrix, axis=0)
+  mean_winnings_for_spins = np.mean(simulations_matrix, axis=0) # operation against each column
+  std_winnings_for_spins = np.std(simulations_matrix, axis=0)
 
-  std_plus = spin_mean_winnings + spin_std_winnings
-  std_minus = spin_mean_winnings - spin_std_winnings
+  std_plus = mean_winnings_for_spins + std_winnings_for_spins
+  std_minus = mean_winnings_for_spins - std_winnings_for_spins
 
-  add_mean_legend(spin_mean_winnings, std_plus, std_minus, 'lower right')
+  add_mean_legend(mean_winnings_for_spins, std_plus, std_minus, 'lower right')
 
   plt.title('Figure 2: 1000 Simulations (Mean & Std)')
 
 #
 def figure_three_test(win_prob):
   '''
-    Run the simple simulator 1000 times (and plot the median and
-    standard deviation lines)
+    Run the simple simulator 1000 times (with max 1000 spins) and plot the median and
+    standard deviation lines
   '''
 
-  simulations_matrix = get_simple_simulations_matrix(win_prob, num_simulations=1000)
+  # matrix of winnings where row = simulation number and col = spin number
+  simulations_matrix = get_simple_simulations_matrix(win_prob, max_spin_count=1000, num_simulations=1000)
 
-  spin_median_winnings = np.median(simulations_matrix, axis=0) # operation against each column
-  spin_std_winnings = np.std(simulations_matrix, axis=0)
+  median_winnings_for_spins = np.median(simulations_matrix, axis=0) # operation against each column
+  std_winnings_for_spins = np.std(simulations_matrix, axis=0)
 
-  std_plus = spin_median_winnings + spin_std_winnings
-  std_minus = spin_median_winnings - spin_std_winnings
+  std_plus = median_winnings_for_spins + std_winnings_for_spins
+  std_minus = median_winnings_for_spins - std_winnings_for_spins
 
-  add_median_legend(spin_median_winnings, std_plus, std_minus, 'lower right')
+  add_median_legend(median_winnings_for_spins, std_plus, std_minus, 'lower right')
 
   plt.title('Figure 3: 1000 Simulations (Median & Std)')
 
 #
 def figure_four_test(win_prob):
   '''
-    Run the realistic simulator 1000 times (and plot the mean and
-    standard deviation lines)
+    Run the realistic simulator 1000 times (with max 1000 spins) and plot the mean and
+    standard deviation lines
   '''
 
-  simulations_matrix = get_real_simulations_matrix(win_prob, num_simulations=1000)
+  simulations_matrix = get_real_simulations_matrix(win_prob, max_spin_count=1000, num_simulations=1000)
 
-  spin_mean_winnings = np.mean(simulations_matrix, axis=0)  # operation against each column
-  spin_std_winnings = np.std(simulations_matrix, axis=0)
+  mean_winnings_for_spins = np.mean(simulations_matrix, axis=0) # operation against each column
+  std_winnings_for_spins = np.std(simulations_matrix, axis=0)
 
-  std_plus = spin_mean_winnings + spin_std_winnings
-  std_minus = spin_mean_winnings - spin_std_winnings
+  std_plus = mean_winnings_for_spins + std_winnings_for_spins
+  std_minus = mean_winnings_for_spins - std_winnings_for_spins
 
-  add_mean_legend(spin_mean_winnings, std_plus, std_minus, 'lower left')
+  add_mean_legend(mean_winnings_for_spins, std_plus, std_minus, 'lower left')
 
   plt.title('Figure 4: 1000 Realistic Simulations (Mean & Std)')
 
 #
 def figure_five_test(win_prob):
   '''
-    Run the realistic simulator 1000 times (and plot the median and
-    standard deviation lines)
+    Run the realistic simulator 1000 times (with max 1000 spins) and plot the median and
+    standard deviation lines
   '''
 
-  simulations_matrix = get_real_simulations_matrix(win_prob, num_simulations=1000)
+  simulations_matrix = get_real_simulations_matrix(win_prob, max_spin_count=1000, num_simulations=1000)
 
-  spin_median_winnings = np.median(simulations_matrix, axis=0) # operation against each column
-  spin_std_winnings = np.std(simulations_matrix, axis=0)
+  median_winnings_for_spins = np.median(simulations_matrix, axis=0) # operation against each column
+  std_winnings_for_spins = np.std(simulations_matrix, axis=0)
 
-  std_plus = spin_median_winnings + spin_std_winnings
-  std_minus = spin_median_winnings - spin_std_winnings
+  std_plus = median_winnings_for_spins + std_winnings_for_spins
+  std_minus = median_winnings_for_spins - std_winnings_for_spins
 
-  add_median_legend(spin_median_winnings, std_plus, std_minus, 'lower right')
+  add_median_legend(median_winnings_for_spins, std_plus, std_minus, 'lower right')
 
   plt.title('Figure 5: 1000 Realistic Simulations (Median & Std)')
 
 #
-def get_simple_simulations_matrix(win_prob, num_simulations):
+def get_simple_simulations_matrix(win_prob, max_spin_count, num_simulations):
   '''
-    Generates a matrix of winnings per spin for some number
-    of num_simulations (using the simple bet simulator)
+    Generates a matrix of winnings per spin for some number of simulations
+    (using the simple bet simulator)
   '''
 
-  simulations_matrix = np.zeros((num_simulations, 1001)) # rows -> each simulation, columns -> each spin in the simulation
+  simulations_matrix = np.zeros((num_simulations, max_spin_count + 1)) # rows -> each simulation, columns -> each spin in the simulation
 
   for sim_count in range(num_simulations):
-    simulations_matrix[sim_count] = run_simple_bet_sim(win_prob, max_spin_count=1000, winnings_limit=80)
+    simulations_matrix[sim_count] = run_simple_bet_sim(win_prob, max_spin_count=max_spin_count, winnings_limit=80)
 
   return simulations_matrix
 
 #
-def get_real_simulations_matrix(win_prob, num_simulations):
+def get_real_simulations_matrix(win_prob, max_spin_count, num_simulations):
   '''
-    Generates a matrix of winnings per spin for some number
-    of num_simulations (using the realistic bet simulator)
+    Generates a matrix of winnings per spin for some number of simulations
+    (using the realistic bet simulator)
   '''
 
-  simulations_matrix = np.zeros((num_simulations, 1001)) # rows -> each simulation, columns -> each spin in the simulation
+  simulations_matrix = np.zeros((num_simulations, max_spin_count + 1)) # rows -> each simulation, columns -> each spin in the simulation
 
   for sim_count in range(num_simulations):
-    simulations_matrix[sim_count] = run_real_bet_sim(win_prob, max_spin_count=1000, winnings_limit=80, initial_money=256)
+    simulations_matrix[sim_count] = run_real_bet_sim(win_prob, max_spin_count=max_spin_count, winnings_limit=80, initial_money=256)
 
   return simulations_matrix
 
@@ -167,7 +169,7 @@ def run_simple_bet_sim(win_prob, max_spin_count, winnings_limit):
     infinite amount of money to spend)
   '''
 
-  winnings_tracker = np.zeros(1001) # track winnings after each spin, start at 0
+  winnings_tracker = np.zeros(max_spin_count + 1) # track winnings after each spin, start at 0
   total_winnings = 0
   bet_amount = 1
   spin_count = 1
@@ -178,6 +180,7 @@ def run_simple_bet_sim(win_prob, max_spin_count, winnings_limit):
     winnings_tracker[spin_count] = total_winnings
     spin_count += 1
 
+  # if we reach or exceed our winnings limit, cascade it for the remaining spins
   if total_winnings >= winnings_limit:
     winnings_tracker[spin_count:] = winnings_limit
 
@@ -190,7 +193,7 @@ def run_real_bet_sim(win_prob, max_spin_count, winnings_limit, initial_money):
     reach the winnings_limit, or lose all of our money
   '''
 
-  winnings_tracker = np.zeros(1001) # track winnings after each spin, start at 0
+  winnings_tracker = np.zeros(max_spin_count + 1) # track winnings after each spin, start at 0
   total_winnings = 0
   bet_amount = 1
   spin_count = 1
@@ -204,9 +207,11 @@ def run_real_bet_sim(win_prob, max_spin_count, winnings_limit, initial_money):
     winnings_tracker[spin_count] = total_winnings
     spin_count += 1
 
+  # if we reach or exceed our winnings limit, cascade it for the remaining spins
   if total_winnings >= winnings_limit:
     winnings_tracker[spin_count:] = winnings_limit
 
+  # if we lose all our money, cascade it for the remaining spins
   if total_winnings <= -initial_money:
     winnings_tracker[spin_count:] = -initial_money
 
