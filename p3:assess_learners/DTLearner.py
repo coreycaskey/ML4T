@@ -1,5 +1,5 @@
 '''
-  ...
+  A simple wrapper for Decision Trees
 '''
 
 import numpy as np
@@ -19,110 +19,105 @@ class DTLearner(object):
   #
   def add_evidence(self, data_x, data_y):
     '''
-      :param data_x: a set of feature values used to train the learner
-      :param data_y: the value we are attempting to predict given the X data
+      Add training data to learner, where data_x is a set of feature values used
+      to train the learner and data_y contains the values we are attempt to predict
     '''
 
-    data = np.column_stack((data_x, data_y)) # pair final column with Xi features
+    data = np.column_stack((data_x, data_y)) # appends Y column to pair with Xi features
 
-    self.d_tree = self.build_tree(data) # recursive tree building call
+    self.d_tree = self.build_tree(data)
 
   #
   def build_tree(self, data):
     '''
-      @param data: training data for building tree
-      @returns the leaf of the tree
+      Recursively builds the tree with the training data and returns the leaf
+      of the tree
     '''
 
-    # None value type denotes leaf node
-    # otherwise, has feature index value
-    if data.shape[0] == 1: # only one instance
+    # A decision tree node (row) in tabular form has the following structure:
+    #   - [ feature index, split value, left node (index offset from current node), right node (index offset from current node) ]
+    #
+    # A leaf node (row) has a slightly different structure:
+    #   - [ None (i.e. not a feature), Y value, NaN, NaN ]
+
+    if data.shape[0] == 1: # one instance of data
       return np.array([[None, data[0, -1], np.nan, np.nan]])
 
-    elif np.unique(data[:, -1]).size == 1:  # all same Y value
+    elif np.unique(data[:, -1]).size == 1: # all same Y value
       return np.array([[None, data[0, -1], np.nan, np.nan]])
 
-    elif data.shape[0] <= self.leaf_size: # leaf_size or fewer elements
-      leaf_split = np.mean(data[:, -1]) # aggregate Y values
-      return np.array([[None, leaf_split, np.nan, np.nan]])
+    elif data.shape[0] <= self.leaf_size: # leaf_size or fewer elements (aggregate data into leaf)
+      return np.array([[None, np.mean(data[:, -1]), np.nan, np.nan]])
 
     else:
-      max_index = self.bestFeature(data)
-      split_val = np.median(data[:, max_index])               # median from best feature column values
+      feature_index = self.get_best_feature(data)
+      split_val = np.median(data[:, feature_index])
 
-      left = data[data[:, max_index] <= split_val]            # elements less than/equal to split_val
-      right = data[data[:, max_index] > split_val]            # elements greater than split_val
-      ds = data.shape[0]
+      left_data = data[data[:, feature_index] <= split_val] # feature values less than / equal to the split value
+      right_data = data[data[:, feature_index] > split_val] # feature values greater than the split value
 
-      if left.shape[0] == ds or right.shape[0] == ds:                     # split_val failed to split any further
-        leaf_split = np.mean(data[:, -1])                               # aggregate Y values
-        return np.array([[None, leaf_split, np.nan, np.nan]])           # make leaf node
+      # failed to split any further (aggregate data into leaf)
+      if left_data.shape[0] == data.shape[0] or right_data.shape[0] == data.shape[0]:
+        return np.array([[None, np.mean(data[:, -1]), np.nan, np.nan]])
 
-      lTree = self.buildTree(left)                                        # make subtrees
-      rTree = self.buildTree(right)
-      root = np.array([[max_index, split_val, 1, lTree.shape[0] + 1]])
+      left_tree = self.build_tree(left_data)
+      right_tree = self.build_tree(right_data)
 
-      return np.vstack((root, lTree, rTree))                              # stack tree nodes (rows) to tree (matrix)
+      root_node = np.array([[feature_index, split_val, 1, left_tree.shape[0] + 1]])
+
+      return np.vstack((root_node, left_tree, right_tree)) # stack tree nodes (rows) in tree matrix
 
   #
-  def bestFeature(self, data):
+  def get_best_feature(self, data):
     '''
-      @summary: Finds the Xi feature with the highest abs val correlation.
-      @param data: training data for building tree.
-      @returns the index of best Xi feature.
+      Finds the best Xi feature to split on (i.e. the feature with the highest
+      absolute value correlation with all Y values) and returns its column index
     '''
-    num_xi = data.shape[1] - 1                              # num of Xi features; ignore Y column
-    feat_corr = np.zeros(num_xi)                            # list to fill with correlations
-    y_vals = data[:, -1]                                    # Y column values
 
-    for i in range(num_xi):                                 # iterate over all features
-        curr_feat = data[:, i]                              # values for current Xi feature
-        corr_tuple = pearsonr(curr_feat, y_vals)            # get correlation value
-        corr_arr = np.absolute(np.asarray(corr_tuple))      # list of absolute value correlations
-        feat_corr[i] = corr_arr[0]                          # store correlation
+    num_xi = data.shape[1] - 1
+    correlations = np.zeros(num_xi)
+    y_vals = data[:, -1]
 
-    max_index = np.argmax(feat_corr, axis = None)           # index of best feature (max abs val correlation)
+    for i in range(num_xi):
+      feature_vals = data[:, i]
+      correlation, _ = pearsonr(feature_vals, y_vals) # tuple of correlation coefficient and p-value
+      correlations[i] = abs(correlation)
 
-    return max_index
+    return np.argmax(correlations, axis=None) # returns the index of the best feature
 
   #
   def query(self, points):
     '''
       Estimate a set of test points given the model we built
-
-      :param points: should be a numpy array with each row corresponding to a specific query.
-      :returns the estimated values according to the saved model.
     '''
 
     pred_y = []
 
     for point in points:
-      leaf_val = self.traverse(0, point) # get predicted Y value (start at root node)
+      leaf_val = self.traverse(0, point) # get predicted Y value
       pred_y.append(leaf_val)
 
     return np.array(pred_y)
 
   #
-  def traverse(self, i, point):
+  def traverse(self, node_index, point):
     '''
-      @summary: Recursively traverse decision tree for given training/testing point
-      @param i: index of node in decision tree (first call starts at root node)
-      @param point: the actual testing/training point from the matrix
-      @returns the predicted Y value for the point.
+      Recursively traverses the decision tree based on a given training / testing
+      point, where the row index in the DT matrix is used to identify the current node
     '''
 
-    node = self.dTree[i]        # info for tree node
+    node = self.d_tree[node_index]
 
-    if node[0] is None:         # reached leaf node
-      return node[1]          # use node split value
+    if node[0] is None: # reached leaf node
+      return node[1]
 
-    feat_index = int(node[0])   # feature index for node comparison
+    feature_index = int(node[0])
 
-    if point[feat_index] <= node[1]:                    # less than/equal to split value
-      return self.traverse(i + int(node[2]), point)   # go to left subtree
+    if point[feature_index] <= node[1]: # value of point at feature index is less than / equal to the split value
+      return self.traverse(node_index + int(node[2]), point)
 
     else:
-      return self.traverse(i + int(node[3]), point)   # go to right subtree
+      return self.traverse(node_index + int(node[3]), point)
 
 #
 if __name__=='__main__':
