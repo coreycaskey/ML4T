@@ -18,10 +18,8 @@ class LinRegLearner(object):
   #
   def add_evidence(self, data_x, data_y):
     '''
-      Add training data to learner
-
-      :param data_x: a set of feature values used to train the learner
-      :param data_y: the value we are attempting to predict given the X data
+      Add training data to learner, where data_x is a set of feature values used
+      to train the learner and data_y contains the values we are attempt to predict
     '''
 
     # add a ones column so linear regression finds a constant term
@@ -35,9 +33,6 @@ class LinRegLearner(object):
   def query(self, points):
     '''
       Estimate a set of test points given the model we built
-
-      :param points: a numpy array with each row corresponding to a specific query
-      :return: the predicted result of the input data according to the trained model
     '''
 
     # self.model_coefs.shape: (N + 1, 1)
