@@ -74,7 +74,7 @@ def assess_portfolio(allocations, symbols, portfolio_prices, multi_val_return=Tr
   '''
 
   normalized_prices = portfolio_prices.copy()
-  normalized_prices /= normalized_prices.iloc[0, :]
+  normalized_prices /= normalized_prices.iloc[0]
   alloc_df = normalized_prices * allocations
 
   # since the initial investment is a constant, we can
