@@ -1,2 +1,4 @@
 # ML4T
-Machine Learning for Trading GaTech Course — Repo Copy from College GitHub Account
+Machine Learning for Trading — Georgia Tech Course
+
+This repository was copied from my private GaTech GitHub account and refactored to work with Python 3
