@@ -1,30 +1,19 @@
 """
-    Market simulator
-
-    Usage:
-    - Point the terminal location to this directory
-    - Run the command `PYTHONPATH=../:. python marketsim.py`
+        Market simulator
 """
 
 import pandas as pd
 import numpy as np
 import datetime as dt
 import os
+
 from util import get_data, plot_data
 
 #
-def compute_portvals(orders_file='./orders/orders-01.csv', start_val=1000000, commission=9.95, impact=0.005):
-    """
-        This function is tested by the autograder
-
-        NOTE: orders_file may be a string, or it may be a file object. Your code should work correctly with either input
-    """
-
-    orders_df = pd.read_csv(orders_file).sort_values(by=['Date'])
-
-    start_date = orders_df.iloc[0].at['Date']
-    end_date = orders_df.iloc[-1].at['Date']
-    symbols = list(orders_df['Symbol'].unique())
+def compute_portvals(orders, start_val=1000000, commission=9.95, impact=0.005):
+    start_date = orders.index[0]
+    end_date = orders.index[-1]
+    symbols = list(orders['Symbol'].unique())
 
     prices_df = get_data(symbols, pd.date_range(start_date, end_date)).drop(['SPY'], axis=1)
     prices_df.fillna(method='ffill', inplace=True)
@@ -36,8 +25,8 @@ def compute_portvals(orders_file='./orders/orders-01.csv', start_val=1000000, co
 
     holdings_df.at[start_date, 'Cash'] = start_val
 
-    for index, row in orders_df.iterrows(): # index for orders_df is an integer
-        date = row['Date']
+    for index, row in orders.iterrows():
+        date = index
         stock = row['Symbol']
         num_shares = row['Shares']
 
@@ -63,29 +52,3 @@ def compute_portvals(orders_file='./orders/orders-01.csv', start_val=1000000, co
     portval_df = value_df.sum(axis=1) # actually a pandas series
 
     return portval_df
-
-#
-def test_code():
-    """
-        This function is not called by the autograder
-
-        Any variables defined below will be set to different values by the autograder
-    """
-
-    start_val = 1000000
-    portvals = compute_portvals(orders_file='./orders/orders-12.csv', start_val=start_val)
-
-    if not isinstance(portvals, pd.Series):
-        print('WARNING: code did not return a Series')
-        return
-
-    print('Starting Portfolio Value: {}'.format(start_val))
-    print('Final Portfolio Value: {}'.format(portvals.iat[-1]))
-
-#
-if __name__ == '__main__':
-    """
-        This code is not called by the autograder
-    """
-
-    test_code()

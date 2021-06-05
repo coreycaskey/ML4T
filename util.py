@@ -1,6 +1,6 @@
-'''
+"""
   Utility Functions
-'''
+"""
 
 import os
 import pandas as pd
@@ -8,9 +8,9 @@ import matplotlib.pyplot as plt
 
 #
 def get_data(symbols, dates, add_spy=True, col_name='Adj Close'):
-  '''
+  """
     Read stock data (adjusted close) for given symbols from CSV files
-  '''
+  """
 
   df = pd.DataFrame(index=dates)
 
@@ -35,9 +35,9 @@ def get_data(symbols, dates, add_spy=True, col_name='Adj Close'):
 
 #
 def symbol_to_path(symbol, base_dir=None):
-  '''
+  """
     Return CSV file path for given ticker symbol
-  '''
+  """
 
   if base_dir is None:
     base_dir = os.environ.get('MARKET_DATA_DIR', '../data/') # pull path from env key or use default path
@@ -46,9 +46,9 @@ def symbol_to_path(symbol, base_dir=None):
 
 #
 def plot_data(df, title='Stock prices', xlabel='Date', ylabel='Price'):
-  '''
+  """
     Plot stock prices with a custom title and meaningful axis labels.
-  '''
+  """
 
   ax = df.plot(title=title, fontsize=12)
   ax.set_xlabel(xlabel)
